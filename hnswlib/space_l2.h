@@ -3,6 +3,7 @@
 #ifdef _MSC_VER
 #include <intrin.h>
 #include <stdexcept>
+#include <cmath>
 
 #define  __builtin_popcount(t) __popcnt(t)
 #else
@@ -32,7 +33,7 @@ namespace hnswlib {
             float t = ((float *) pVect1)[i] - ((float *) pVect2)[i];
             res += t * t;
         }
-        return (res);
+        return sqrt(res);
 
     };
 
@@ -147,7 +148,7 @@ namespace hnswlib {
         _mm_store_ps(TmpRes, sum);
         float res = TmpRes[0] + TmpRes[1] + TmpRes[2] + TmpRes[3];
 
-        return (res);
+        return sqrt(res);
     };
 
     class L2Space : public SpaceInterface<float> {
