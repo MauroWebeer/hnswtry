@@ -582,6 +582,10 @@ namespace hnswlib {
             addPoint(data_point, label,-1);
         };
 
+        unsigned short int getListCount(linklistsizeint * ptr) const {
+            return *((unsigned short int *)ptr);
+        }
+
         tableint addPoint(void *data_point, labeltype label, int level) {
 
             tableint cur_c = 0;
