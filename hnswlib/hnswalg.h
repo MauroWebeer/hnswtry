@@ -818,7 +818,7 @@ namespace hnswlib {
                     k1_rez.second, query_data, k);
             std::priority_queue<std::pair<dist_t, labeltype >> results_final;
             while (top_candidates_final.size() > k) {
-                top_candidates.pop();
+                top_candidates_final.pop();
             }
 
             while (top_candidates_final.size() > 0) {
