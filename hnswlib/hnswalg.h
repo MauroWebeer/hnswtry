@@ -307,7 +307,7 @@ namespace hnswlib {
 
                 tableint current_node_id = current_node_pair.second;
                 int *data_1 = (int *) get_linklist0(current_node_id);
-                size_t size_1 = getListCount((linklistsizeint*)data);
+                size_t size_1 = getListCount((linklistsizeint*)data_1);
 
                 for (size_t j = 1; j <= size_1; j++) {
                     int candidate_id = data_1[j];
@@ -361,14 +361,10 @@ namespace hnswlib {
                                 topCandidatesCopy.pop();
                             }
                             if (infl_key)
-                                if ((!has_deletions || !isMarkedDeleted(candidatePair.second)) && ((!isIdAllowed) || (*isIdAllowed)(getExternalLabel(candidatePair.second))))
-                                    top_candidates.emplace(candidatePair.first, candidatePair.second);
+                                top_candidates.emplace(candidatePair.first, candidatePair.second);
 
                             while (top_candidates.size() > ef)
                                 top_candidates.pop();
-
-                            if (!top_candidates.empty())
-                                lowerBound = top_candidates.top().first;
                         }
                     }
                 }
