@@ -805,16 +805,26 @@ namespace hnswlib {
             }
 
 
-            std::priority_queue<std::pair<dist_t, tableint>, vector<pair<dist_t, tableint>>, CompareByFirst> top_candidates = searchBaseLayerST(
-                    currObj, query_data, std::max(ef_,k));
+            std::priority_queue<std::pair<dist_t, tableint>, vector<pair<dist_t, tableint>>, CompareByFirst> top_1_candidates = searchBaseLayerST(
+                    currObj, query_data, 1);
             std::priority_queue<std::pair<dist_t, labeltype >> results;
-            while (top_candidates.size() > k) {
+            while (top_1_candidates.size() > 1) {
+                top_1_candidates.pop();
+            }
+
+            std::pair<dist_t, tableint> k1_rez = top_1_candidates.top();
+            
+            std::priority_queue<std::pair<dist_t, tableint>, vector<pair<dist_t, tableint>>, CompareByFirst> top_candidates_final = searchBaseLayerSTInflu(
+                    k1_rez.second, query_data, k);
+            std::priority_queue<std::pair<dist_t, labeltype >> results_final;
+            while (top_candidates_final.size() > k) {
                 top_candidates.pop();
             }
-            while (top_candidates.size() > 0) {
-                std::pair<dist_t, tableint> rez = top_candidates.top();
-                results.push(std::pair<dist_t, labeltype>(rez.first, getExternalLabel(rez.second)));
-                top_candidates.pop();
+
+            while (top_candidates_final.size() > 0) {
+                std::pair<dist_t, tableint> rez = top_candidates_final.top();
+                results_final.push(std::pair<dist_t, labeltype>(rez.first, getExternalLabel(rez.second)));
+                top_candidates_final.pop();
             }
             return results;
         };
