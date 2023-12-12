@@ -350,10 +350,7 @@ namespace hnswlib {
                                 dist_t dist_c = fstdistfunc_(currObj3, currObj1, dist_func_param_);
 
                                 // Perform validation on each element in topCandidatesCopy
-                                if (dist_c > distanceToTopCandidate) {
-                                    std::cout  << dist_c << " YOU PASS " << distanceToTopCandidate << std::endl;
-                                } else {
-                                    // std::cout << dist_c <<" YOU DIDN'T PASS " << distanceToTopCandidate << std::endl;
+                                if (dist_c <= distanceToTopCandidate) {
                                     infl_key = false;
                                     break;
                                 }
