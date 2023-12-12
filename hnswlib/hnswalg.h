@@ -823,7 +823,7 @@ namespace hnswlib {
                 results_final.push(std::pair<dist_t, labeltype>(rez.first, getExternalLabel(rez.second)));
                 top_candidates_final.pop();
             }
-            return results;
+            return results_final;
         };
 
 
