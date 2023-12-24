@@ -288,7 +288,7 @@ namespace hnswlib {
             std::priority_queue<std::pair<dist_t, tableint>, vector<pair<dist_t, tableint>>, CompareByFirst> lista_teste;
             std::priority_queue<std::pair<dist_t, tableint>, vector<pair<dist_t, tableint>>, CompareByFirst> candidate_set;
             dist_t dist = fstdistfunc_(data_point, getDataByInternalId(ep_id), dist_func_param_);
-            float distanco = 0.0
+            float distanco = 0.0;
             top_candidates.emplace(dist, ep_id);
             lista_teste.emplace(distanco, ep_id);
             candidate_set.emplace(-dist, ep_id);
