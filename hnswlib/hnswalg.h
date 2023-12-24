@@ -332,7 +332,7 @@ namespace hnswlib {
                 while (!neighborsQueue.empty()) {
                     std::priority_queue<std::pair<dist_t, tableint>, std::vector<std::pair<dist_t, tableint>>, CompareByFirst> topCandidatesCopy = top_candidates;
                     std::pair<dist_t, tableint> candidatePair = neighborsQueue.top();
-                    lista_teste.push(-candidatePair.first, candidatePair.second);
+                    lista_teste.emplace(candidatePair.first, candidatePair.second);
                     neighborsQueue.pop();
             
                     if (!(visited_array[candidatePair.second] == visited_array_tag)) {
@@ -817,9 +817,9 @@ namespace hnswlib {
             std::pair<dist_t, tableint> k1_rez = top_1_candidates.top();
             
             std::priority_queue<std::pair<dist_t, tableint>, vector<pair<dist_t, tableint>>, CompareByFirst> top_candidates_final = searchBaseLayerSTInflu(
-                    k1_rez.second, query_data, 30);
+                    k1_rez.second, query_data, k);
             std::priority_queue<std::pair<dist_t, labeltype >> results_final;
-            while (top_candidates_final.size() > 30) {
+            while (top_candidates_final.size() > 5) {
                 top_candidates_final.pop();
             }
 
