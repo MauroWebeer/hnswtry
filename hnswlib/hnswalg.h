@@ -288,9 +288,9 @@ namespace hnswlib {
             std::priority_queue<std::pair<dist_t, tableint>, vector<pair<dist_t, tableint>>, CompareByFirst> lista_teste;
             std::priority_queue<std::pair<dist_t, tableint>, vector<pair<dist_t, tableint>>, CompareByFirst> candidate_set;
             dist_t dist = fstdistfunc_(data_point, getDataByInternalId(ep_id), dist_func_param_);
-
+            float distanco = 0.0
             top_candidates.emplace(dist, ep_id);
-            lista_teste.emplace(dist, ep_id);
+            lista_teste.emplace(distanco, ep_id);
             candidate_set.emplace(-dist, ep_id);
             visited_array[ep_id] = visited_array_tag;
 
@@ -337,7 +337,8 @@ namespace hnswlib {
             
                     if (!(visited_array[candidatePair.second] == visited_array_tag)) {
                         visited_array[candidatePair.second] = visited_array_tag;
-                        lista_teste.emplace(candidatePair.first, candidatePair.second);
+                        distanco += 1.0;
+                        lista_teste.emplace(distanco, candidatePair.second);
                    
                         if (top_candidates.size() < ef) {
                             candidate_set.emplace(-candidatePair.first, candidatePair.second);
