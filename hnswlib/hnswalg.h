@@ -290,7 +290,7 @@ namespace hnswlib {
             dist_t dist = fstdistfunc_(data_point, getDataByInternalId(ep_id), dist_func_param_);
 
             top_candidates.emplace(dist, ep_id);
-            lista_teste.push(dist, ep_id);
+            lista_teste.emplace(dist, ep_id);
             candidate_set.emplace(-dist, ep_id);
             visited_array[ep_id] = visited_array_tag;
 
