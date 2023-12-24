@@ -278,6 +278,103 @@ namespace hnswlib {
             return top_candidates;
         }
 
+        std::priority_queue<std::pair<dist_t, tableint>, vector<pair<dist_t, tableint>>, CompareByFirst>
+        searchBaseLayerSTInflu(tableint ep_id, void *data_point, size_t ef) {
+            VisitedList *vl = visited_list_pool_->getFreeVisitedList();
+            vl_type *visited_array = vl->mass;
+            vl_type visited_array_tag = vl->curV;
+            
+            std::priority_queue<std::pair<dist_t, tableint>, vector<pair<dist_t, tableint>>, CompareByFirst> top_candidates;
+            std::priority_queue<std::pair<dist_t, tableint>, vector<pair<dist_t, tableint>>, CompareByFirst> candidate_set;
+            dist_t dist = fstdistfunc_(data_point, getDataByInternalId(ep_id), dist_func_param_);
+
+            top_candidates.emplace(dist, ep_id);
+            candidate_set.emplace(-dist, ep_id);
+            visited_array[ep_id] = visited_array_tag;
+
+            // Create a priority queue to store candidates with distances
+            std::priority_queue<std::pair<dist_t, tableint>, std::vector<std::pair<dist_t, tableint>>, std::greater<>> neighborsQueue;
+
+            while (!candidate_set.empty()) {
+                std::pair<dist_t, tableint> current_node_pair = candidate_set.top();
+                
+                char *currObj2 = (getDataByInternalId(current_node_pair.second));
+
+                if (top_candidates.size() > ef) {
+                    break;
+                }
+                candidate_set.pop();
+
+                tableint current_node_id = current_node_pair.second;
+                int *data_1 = (int *) get_linklist0(current_node_id);
+                size_t size_1 = getListCount((linklistsizeint*)data_1);
+
+                for (size_t j = 1; j <= size_1; j++) {
+                    int candidate_id = data_1[j];
+                    char *currObj1 = getDataByInternalId(candidate_id);
+                    dist_t dist_candidate = fstdistfunc_(data_point, currObj1, dist_func_param_);
+
+                    // Add the candidate and distance to the priority queue
+                    neighborsQueue.emplace(dist_candidate, candidate_id);
+                }
+
+                int *data = (int *) (data_level0_memory_ + current_node_id * size_data_per_element_ + offsetLevel0_);
+                int size = *data;
+                _mm_prefetch((char *) (visited_array + *(data + 1)), _MM_HINT_T0);
+                _mm_prefetch((char *) (visited_array + *(data + 1) + 64), _MM_HINT_T0);
+                _mm_prefetch(data_level0_memory_ + (*(data + 1)) * size_data_per_element_ + offsetData_, _MM_HINT_T0);
+                _mm_prefetch((char *) (data + 2), _MM_HINT_T0);
+
+                
+                while (!neighborsQueue.empty()) {
+                    std::priority_queue<std::pair<dist_t, tableint>, std::vector<std::pair<dist_t, tableint>>, CompareByFirst> topCandidatesCopy = top_candidates;
+                    std::pair<dist_t, tableint> candidatePair = neighborsQueue.top();
+                    neighborsQueue.pop();
+            
+                    if (!(visited_array[candidatePair.second] == visited_array_tag)) {
+                        visited_array[candidatePair.second] = visited_array_tag;    
+                   
+                        if (top_candidates.size() < ef) {
+                            candidate_set.emplace(-candidatePair.first, candidatePair.second);
+                            // std::cout << "put_on_set: " << candidatePair.second << std::endl;
+    #ifdef USE_SSE
+                            _mm_prefetch(data_level0_memory_ + candidate_set.top().second * size_data_per_element_ +
+                                            offsetLevel0_,  ///////////
+                                        _MM_HINT_T0);  ////////////////////////
+    #endif
+                            bool infl_key = true;
+                            while (!topCandidatesCopy.empty()) {
+                                dist_t distanceToTopCandidate = topCandidatesCopy.top().first;
+                                char *currObj3 = (getDataByInternalId(topCandidatesCopy.top().second));
+                                char *currObj1 = (getDataByInternalId(candidatePair.second));
+                                dist_t dist_c = fstdistfunc_(currObj3, currObj1, dist_func_param_);
+
+                                // Perform validation on each element in topCandidatesCopy
+                                if (dist_c <= distanceToTopCandidate) {
+                                    infl_key = false;
+                                    break;
+                                }
+
+                                topCandidatesCopy.pop();
+                            }
+                            if (infl_key)
+                                top_candidates.emplace(candidatePair.first, candidatePair.second);
+
+                            while (top_candidates.size() > ef)
+                                top_candidates.pop();
+                        }
+                    }
+                }
+            }
+
+            visited_list_pool_->releaseVisitedList(vl);
+            return top_candidates;
+        }
+
+        unsigned short int getListCount(linklistsizeint * ptr) const {
+            return *((unsigned short int *)ptr);
+        }
+
         void getNeighborsByHeuristic2(
                 std::priority_queue<std::pair<dist_t, tableint>, vector<pair<dist_t, tableint>>, CompareByFirst> &top_candidates,
                 const int M) {
@@ -706,18 +803,28 @@ namespace hnswlib {
             }
 
 
-            std::priority_queue<std::pair<dist_t, tableint>, vector<pair<dist_t, tableint>>, CompareByFirst> top_candidates = searchBaseLayerST(
-                    currObj, query_data, std::max(ef_,k));
+            std::priority_queue<std::pair<dist_t, tableint>, vector<pair<dist_t, tableint>>, CompareByFirst> top_1_candidates = searchBaseLayerST(
+                    currObj, query_data, 1);
             std::priority_queue<std::pair<dist_t, labeltype >> results;
-            while (top_candidates.size() > k) {
-                top_candidates.pop();
+            while (top_1_candidates.size() > 1) {
+                top_1_candidates.pop();
             }
-            while (top_candidates.size() > 0) {
-                std::pair<dist_t, tableint> rez = top_candidates.top();
-                results.push(std::pair<dist_t, labeltype>(rez.first, getExternalLabel(rez.second)));
-                top_candidates.pop();
+
+            std::pair<dist_t, tableint> k1_rez = top_1_candidates.top();
+            
+            std::priority_queue<std::pair<dist_t, tableint>, vector<pair<dist_t, tableint>>, CompareByFirst> top_candidates_final = searchBaseLayerSTInflu(
+                    k1_rez.second, query_data, k);
+            std::priority_queue<std::pair<dist_t, labeltype >> results_final;
+            while (top_candidates_final.size() > k) {
+                top_candidates_final.pop();
             }
-            return results;
+
+            while (top_candidates_final.size() > 0) {
+                std::pair<dist_t, tableint> rez = top_candidates_final.top();
+                results_final.push(std::pair<dist_t, labeltype>(rez.first, getExternalLabel(rez.second)));
+                top_candidates_final.pop();
+            }
+            return results_final;
         };
 
 
