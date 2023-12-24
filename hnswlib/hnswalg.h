@@ -332,11 +332,12 @@ namespace hnswlib {
                 while (!neighborsQueue.empty()) {
                     std::priority_queue<std::pair<dist_t, tableint>, std::vector<std::pair<dist_t, tableint>>, CompareByFirst> topCandidatesCopy = top_candidates;
                     std::pair<dist_t, tableint> candidatePair = neighborsQueue.top();
-                    lista_teste.emplace(candidatePair.first, candidatePair.second);
+                    
                     neighborsQueue.pop();
             
                     if (!(visited_array[candidatePair.second] == visited_array_tag)) {
-                        visited_array[candidatePair.second] = visited_array_tag;    
+                        visited_array[candidatePair.second] = visited_array_tag;
+                        lista_teste.emplace(candidatePair.first, candidatePair.second);
                    
                         if (top_candidates.size() < ef) {
                             candidate_set.emplace(-candidatePair.first, candidatePair.second);
