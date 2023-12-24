@@ -817,9 +817,9 @@ namespace hnswlib {
             std::pair<dist_t, tableint> k1_rez = top_1_candidates.top();
             
             std::priority_queue<std::pair<dist_t, tableint>, vector<pair<dist_t, tableint>>, CompareByFirst> top_candidates_final = searchBaseLayerSTInflu(
-                    k1_rez.second, query_data, 2k);
+                    k1_rez.second, query_data, 30);
             std::priority_queue<std::pair<dist_t, labeltype >> results_final;
-            while (top_candidates_final.size() > 2k) {
+            while (top_candidates_final.size() > 30) {
                 top_candidates_final.pop();
             }
 
